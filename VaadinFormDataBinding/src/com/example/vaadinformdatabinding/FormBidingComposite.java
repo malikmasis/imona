@@ -29,7 +29,6 @@ import com.vaadin.ui.PopupView;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 public class FormBidingComposite extends CustomComponent {
@@ -47,13 +46,13 @@ public class FormBidingComposite extends CustomComponent {
 	static String idNumber = "";
 	static Integer Id = 0;
 	Form baglanUpdate = new Form();
-	// TextField tf= new TextField();
-	TextField tf = new TextField("wek");
 	KullaniciFormBean kullaniciFormBean = new KullaniciFormBean();
-	BeanItem beanItem = new BeanItem(kullaniciFormBean);
+	BeanItem<KullaniciFormBean> beanItem = new BeanItem<KullaniciFormBean>(
+			kullaniciFormBean);
 
 	KullaniciFormBean kullaniciFormBeanUpdate = new KullaniciFormBean();
-	BeanItem beanItemUpdate = new BeanItem(kullaniciFormBeanUpdate);
+	BeanItem<KullaniciFormBean> beanItemUpdate = new BeanItem<KullaniciFormBean>(
+			kullaniciFormBeanUpdate);
 	Table table1;
 
 	Table tableGenerate() {
@@ -82,7 +81,7 @@ public class FormBidingComposite extends CustomComponent {
 
 	public void listTab3() throws Exception {
 		try {
-			System.out.println("sira");
+			System.out.println("listTab3");
 			Class.forName("com.mysql.jdbc.Driver");
 
 			String url = "jdbc:mysql://localhost:3306/imona";
@@ -110,25 +109,25 @@ public class FormBidingComposite extends CustomComponent {
 				rs = cs.executeQuery("select * from customer where birthCity= 'istanbul' ");
 			}
 
-			String[][] bdy= new String[10][5];
+			String[][] bdy = new String[10][5];
 			while (rs.next()) {
-				
+
 				table1.addItem(
 						new Object[] { rs.getString(1), rs.getString(2),
 								rs.getString(3), rs.getString(4),
 								rs.getString(5), rs.getBoolean(6) }, itemId++);
-				//System.out.println("List--" + rs.getString(1));
-				for(int k=0; k<5;k++){
-					//System.out.println("geliyor mu"+itemId+"--"+k);
-					bdy[itemId-2][k]=rs.getString(k+1);
-					//		System.out.println(rs.getString(k+1)+"---");
-					System.out.println(bdy[itemId-2][k]+"***");
+				// System.out.println("List--" + rs.getString(1));
+				for (int k = 0; k < 5; k++) {
+					// System.out.println("geliyor mu"+itemId+"--"+k);
+					bdy[itemId - 2][k] = rs.getString(k + 1);
+					// System.out.println(rs.getString(k+1)+"---");
+					System.out.println(bdy[itemId - 2][k] + "***");
 				}
-				
-				
-			createSamplePDF(new String[] { "name", rs.getString(2),rs.getString(3),
-						rs.getString(4),
-						rs.getString(5)}, bdy);
+
+				createSamplePDF(
+						new String[] { "name", rs.getString(2),
+								rs.getString(3), rs.getString(4),
+								rs.getString(5) }, bdy);
 			}
 			System.out.println("pdf ok");
 			con.close();
@@ -146,23 +145,22 @@ public class FormBidingComposite extends CustomComponent {
 			throws Exception {
 		Document documento = new Document();
 		// Create new File
-		File file = new File("C:\\filter.pdf");
+		File file = new File("D:\\filter.pdf");
 		file.createNewFile();
 		FileOutputStream fop = new FileOutputStream(file);
 		PdfWriter.getInstance(documento, fop);
 		documento.open();
 		// Fonts
-		Font fontHeader = new Font(Font.TIMES_ROMAN, 12, Font.BOLD);
 		Font fontBody = new Font(Font.COURIER, 12, Font.NORMAL);
 		// Table for header
 		PdfPTable cabetabla = new PdfPTable(header.length);
 		for (int j = 0; j < header.length; j++) {
 			Phrase frase = new Phrase(header[j]);
 			PdfPCell cell = new PdfPCell(frase);
-			// cell.setBackgroundColor(new BaseColor(Color.lightGray.getRGB()));
 			cabetabla.addCell(cell);
 		}
 		documento.add(cabetabla);
+
 		// Tabla for body
 		PdfPTable tabla = new PdfPTable(header.length);
 		for (int i = 0; i < body.length; i++) {
@@ -178,7 +176,7 @@ public class FormBidingComposite extends CustomComponent {
 
 	public void listUpdate() {
 		try {
-			System.out.println("sira");
+			System.out.println("ListUpdate");
 			Class.forName("com.mysql.jdbc.Driver");
 
 			String url = "jdbc:mysql://localhost:3306/imona";
@@ -193,45 +191,24 @@ public class FormBidingComposite extends CustomComponent {
 			st = con.createStatement();
 			System.out.println("Baglandi");
 
-			int itemId = 1;
+			// int itemId = 1;
 			cs = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
 					ResultSet.CONCUR_UPDATABLE);
 
 			System.out.println("update List");
-			rs = cs.executeQuery("select name,surname,gender,birthCity,flag from customer where Id='"
+			rs = cs.executeQuery("select name,surname,gender,birthCity,flag,birthDate from customer where Id='"
 					+ Id + "'");
 
 			while (rs.next()) {
 
-				System.out.println("Update1--" + rs.getString(1));
-				System.out.println("Update2--" + rs.getString(2));
-				System.out.println("Update3--" + rs.getString(3));
-				// System.out.println("Update4--" + rs.getDate(4));
-				System.out.println("Update5--" + rs.getString(4));
-				System.out.println("Update6--" + rs.getBoolean(5));
-				// tf.setValue(rs.getString(1));
-
-				tf.setValue(rs.getString(1));
-				tf.addListener(new Listener() {
-
-					@Override
-					public void componentEvent(Event event) {
-						// System.out.println("amac ne ");
-						System.out.println(tf.getValue() + "**");
-					}
-				});
-				System.out.println(tf.getValue() + "--");
 				kullaniciFormBeanUpdate.setName(rs.getString(1));
 				kullaniciFormBeanUpdate.setSurname(rs.getString(2));
 				kullaniciFormBeanUpdate.setGender(rs.getString(3));
-				// kullaniciFormBean.setBirthDate(rs.getDate(4));
 				kullaniciFormBeanUpdate.setBirthCity(rs.getString(4));
 				kullaniciFormBeanUpdate.setFlag(rs.getBoolean(5));
-				// System.out.println("date:" + rs.getDate(4));
+				// kullaniciFormBeanUpdate.setBirthDate(rs.getDate(6));
+
 			}
-			// baglanUpdate.setWriteThrough(false);
-			System.out.println(kullaniciFormBean.getName() + "dd"
-					+ kullaniciFormBeanUpdate.name);
 
 			con.close();
 		} catch (ClassNotFoundException ex) {
@@ -247,7 +224,7 @@ public class FormBidingComposite extends CustomComponent {
 	public void list() {
 
 		try {
-			System.out.println("sira");
+			System.out.println("list");
 			Class.forName("com.mysql.jdbc.Driver");
 
 			String url = "jdbc:mysql://localhost:3306/imona";
@@ -278,14 +255,20 @@ public class FormBidingComposite extends CustomComponent {
 			}
 
 			con.close();
-		} catch (Exception ex) {
-			System.out.println("hata veritaban Silme");
+		} catch (ClassNotFoundException ex) {
+			ex.printStackTrace();
+			System.out.println("Sürücü projeye eklenmemiş!");
+
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+			System.out.println("Veritabanına bağlantı sağlanamadı!");
 		}
 	}
 
 	public void update() {
-
+		baglanUpdate.setValidationVisible(false);
 		try {
+			baglanUpdate.validate();
 			System.out.println("update");
 			Class.forName("com.mysql.jdbc.Driver");
 
@@ -304,27 +287,23 @@ public class FormBidingComposite extends CustomComponent {
 			cs = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
 					ResultSet.CONCUR_UPDATABLE);
 
-			String query = "update customer set  name= ? where Id='" + Id + "'";
-			// surname = ? gender = ? birthDate = ? birthCity = ? flag = ? ;
-			// sorgu.setInt(1, silinecekOnKayitDomain.getId());
-
-			// table.setEditable(true);
-			String newName = kullaniciFormBeanUpdate.getName();
-			System.out.println("NEWNAME:" + newName);
+			String query = "update customer set  name= ? , surname=?, gender=?, birthCity=? , flag=? where Id='"
+					+ Id + "'";
+			
 			PreparedStatement preparedStatement = (PreparedStatement) con
 					.prepareStatement(query);
 			preparedStatement.setString(1, kullaniciFormBeanUpdate.getName());
-			System.out.println("A:" + kullaniciFormBean.getName());
-			// preparedStatement.setString(2, kullaniciFormBean.getSurname());
-			// preparedStatement.setString(3, kullaniciFormBean.getGender());
-			// preparedStatement.setString(4, kullaniciFormBean.getBirthDate()
-			// .toString());
-			// preparedStatement.setString(5, kullaniciFormBean.getBirthCity());
-			// preparedStatement.setBoolean(6, kullaniciFormBean.isFlag());
-			//
+			preparedStatement
+					.setString(2, kullaniciFormBeanUpdate.getSurname());
+			preparedStatement.setString(3, kullaniciFormBeanUpdate.getGender());
+			preparedStatement.setString(4,
+					kullaniciFormBeanUpdate.getBirthCity());
+			preparedStatement.setBoolean(5, kullaniciFormBeanUpdate.isFlag());
+//			preparedStatement.setString(6, kullaniciFormBean.getBirthDate()
+//					.toString());
 			preparedStatement.execute();
-			System.out.println("uptade ayakları:" + Id);
 			con.close();
+			getWindow().showNotification("Update Success!");
 		} catch (ClassNotFoundException ex) {
 			ex.printStackTrace();
 			System.out.println("Sürücü projeye eklenmemiş! u");
@@ -332,6 +311,8 @@ public class FormBidingComposite extends CustomComponent {
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 			System.out.println("Veritabanına bağlantı sağlanamadı!u");
+		} catch (InvalidValueException e) {
+			baglanUpdate.setValidationVisible(true);
 		}
 	}
 
@@ -345,27 +326,18 @@ public class FormBidingComposite extends CustomComponent {
 			String sifre = "";
 
 			Connection con = null;
-			// Statement st = null;
-			ResultSet rs = null;
 
 			con = DriverManager.getConnection(url, kullaniciad, sifre);
-			// st = con.createStatement();
 			System.out.println("Baglandi");
-			// int name = 28;
-			// st.executeUpdate("delete from customer where Id= '" + name +
-			// "'");
-			String query = "delete from customer where Id = ?";
 
-			// sorgu.setInt(1, silinecekOnKayitDomain.getId());
+			String query = "delete from customer where Id = ?";
 			PreparedStatement preparedStmt = (PreparedStatement) con
 					.prepareStatement(query);
 			preparedStmt.setInt(1, Id);
 
-			// execute the preparedstatement
 			preparedStmt.execute();
 			con.close();
 
-			System.out.println("sildim :)");
 		} catch (ClassNotFoundException ex) {
 			ex.printStackTrace();
 			System.out.println("Sürücü projeye eklenmemiş!");
@@ -394,9 +366,11 @@ public class FormBidingComposite extends CustomComponent {
 		baglanUpdate.setFormFieldFactory(new KullaniciFormFieldFactory());
 		baglanUpdate.setItemDataSource(beanItemUpdate);
 
-		Button btnGonder = new Button("Send");
-		Button input = new Button("Reset");
-		btnGonder.addListener(new ClickListener() {
+		Button buttonSend = new Button("Send");
+		Button reset = new Button("Reset");
+		buttonSend.addListener(new ClickListener() {
+
+			private static final long serialVersionUID = 1L;
 
 			public void buttonClick(ClickEvent event) {
 				baglanacakForm.setValidationVisible(false);
@@ -454,17 +428,14 @@ public class FormBidingComposite extends CustomComponent {
 					baglanacakForm.setValidationVisible(true);
 				}
 
-				// System.out.println("Name:" + kullaniciFormBean.getName()
-				// + "\nSurname:" + kullaniciFormBean.getSurname()
-				// + "\nGender:" + kullaniciFormBean.getGender()
-				// + "\nDate:" + kullaniciFormBean.getBirthDate()
-				// + "\nBirth City" + kullaniciFormBean.getBirthCity()
-				// + "\nState" + kullaniciFormBean.isFlag());
 			}
 
 		});
 
-		input.addListener(new ClickListener() {
+		reset.addListener(new ClickListener() {
+
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void buttonClick(ClickEvent event) {
 				baglanacakForm.getField("name").setValue("");
@@ -476,6 +447,7 @@ public class FormBidingComposite extends CustomComponent {
 			}
 		});
 
+		// order component
 		Vector<String> order = new Vector<String>();
 		order.add("name");
 		order.add("surname");
@@ -490,16 +462,19 @@ public class FormBidingComposite extends CustomComponent {
 		baglanacakForm.setRequired(true);
 		baglanUpdate.setRequired(true);
 
+		// tab1 start
 		TabSheet tabsheet = new TabSheet();
 
 		VerticalLayout myTabRoot = new VerticalLayout();
-		// myTabRoot.addComponent(baglanacakForm);
+
 		myTabRoot.addComponent(baglanacakForm);
-		myTabRoot.addComponent(btnGonder);
-		myTabRoot.addComponent(input);
+		myTabRoot.addComponent(buttonSend);
+		myTabRoot.addComponent(reset);
+
 		tabsheet.addTab(myTabRoot);
 		tabsheet.getTab(myTabRoot).setCaption("First Tab");
 
+		// tab2 start
 		table = new Table();
 		table.setStyleName("iso3166");
 		table.setPageLength(6);
@@ -513,98 +488,6 @@ public class FormBidingComposite extends CustomComponent {
 		table.setImmediate(true);
 		table.setEnabled(true);
 
-		Button updateButton = new Button("Update");
-		VerticalLayout myTabRoot2 = new VerticalLayout();
-		VerticalLayout popupContent = new VerticalLayout();
-		popupContent.addComponent(updateButton);
-		updateButton.addListener(new ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				update();
-				table.removeAllItems();
-				list();
-
-			}
-		});
-
-		Label labelDelete = new Label("Are You Sure");
-		Button deleteButton = new Button("Yes");
-
-		deleteButton.addListener(new Button.ClickListener() {
-			public void buttonClick(ClickEvent event) {
-				delete();
-				list();
-
-			}
-		});
-
-		VerticalLayout popupContentDelete = new VerticalLayout();
-		popupContentDelete.addComponent(labelDelete);
-		popupContentDelete.addComponent(deleteButton);
-
-		VerticalLayout popupContentGuncel = new VerticalLayout();
-
-		// TextField tf = new TextField();
-		// for(int i=0;i<6;i++){
-		// //tf.setCaption("S"+i);
-		// popupContentGuncel.addComponent(new TextField());
-		// }
-
-		Button update = new Button("OK");
-		popupContentGuncel.addComponent(baglanUpdate);
-		popupContentGuncel.addComponent(update);
-		popupContentGuncel.addComponent(tf);
-		update.addListener(new ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				System.out.println("1");
-				listUpdate();
-				update();
-				System.out.println("2");
-				// table.removeAllItems();
-				System.out.println("3");
-				// list();
-
-			}
-		});
-
-		// The component itself
-		PopupView popupDelete = new PopupView("Delete", popupContentDelete);
-		PopupView popupGuncel = new PopupView("Guncel", popupContentGuncel);
-
-		PopupView popupUptade = new PopupView("Uptade", popupContent);
-
-		table.addListener(new ItemClickEvent.ItemClickListener() {
-			public void itemClick(ItemClickEvent event) {
-				if (event.getButton() == ItemClickEvent.BUTTON_LEFT) {
-					// Right mouse button clicked, do greatThings!
-					System.out.println(event.getItemId().toString());
-					myTabRoot2.addComponent(popupDelete);
-					myTabRoot2.addComponent(popupUptade);
-					myTabRoot2.addComponent(popupGuncel);
-					myTabRoot2.addComponent(tf);
-					idNumber = event.getItemId().toString();
-					table.setImmediate(true);
-					System.out.println("f" + event.getPropertyId());
-					System.out.println("ada" + event.getButton() + "-"
-							+ event.toString() + "*" + event.getItemId());
-
-					// Object rowId = table.getValue();
-					// grid.getColumn("fullName").setEditable(false);
-					Id = (Integer) table.getContainerProperty(
-							event.getItemId(), "ID").getValue();
-					System.out.println("aa:" + Id);
-					listUpdate();
-				}
-			}
-		});
-
-		/*
-		 * Define the names and data types of columns. The "default value"
-		 * parameter is meaningless here.
-		 */
 		table.addContainerProperty("ID", Integer.class, "");
 		table.addContainerProperty("NAME", String.class, "");
 		table.addContainerProperty("SURNAME", String.class, "");
@@ -613,26 +496,84 @@ public class FormBidingComposite extends CustomComponent {
 		table.addContainerProperty("BIRTH CITY", String.class, "");
 		table.addContainerProperty("STATUS", Boolean.class, "");
 
-		System.out.println("aaaa" + table.getContainerProperty(1, "Id"));
-		list();
-		tabsheet.addListener(new TabSheet.SelectedTabChangeListener() {
-			public void selectedTabChange(SelectedTabChangeEvent event) {
-				getApplication().getMainWindow().showNotification(
-						"Caught Event");
+		VerticalLayout myTabRoot2 = new VerticalLayout();
 
-				// table.setImmediate(true);
-				// table.setImmediate(true);
-				// table.sort();
-				// table.refreshRowCache();
+		Label labelDelete = new Label("Are You Sure");
+		Button deleteButton = new Button("Yes");
+
+		deleteButton.addListener(new Button.ClickListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			public void buttonClick(ClickEvent event) {
+				delete();
+				list();
+
+			}
+		});
+
+		VerticalLayout popupContentDelete = new VerticalLayout();
+
+		popupContentDelete.addComponent(labelDelete);
+		popupContentDelete.addComponent(deleteButton);
+
+		VerticalLayout popupContentGuncel = new VerticalLayout();
+
+		Button updateOK = new Button("OK");
+		popupContentGuncel.addComponent(baglanUpdate);
+		popupContentGuncel.addComponent(updateOK);
+		updateOK.addListener(new ClickListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				update();
 				table.removeAllItems();
 				list();
 
 			}
 		});
+
+		PopupView popupDelete = new PopupView("Delete", popupContentDelete);
+		PopupView popupGuncel = new PopupView("Guncel", popupContentGuncel);
+
+		table.addListener(new ItemClickEvent.ItemClickListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			public void itemClick(ItemClickEvent event) {
+				if (event.getButton() == ItemClickEvent.BUTTON_LEFT) {
+					// left mouse button clicked on table
+					myTabRoot2.addComponent(popupDelete);
+					myTabRoot2.addComponent(popupGuncel);
+					idNumber = event.getItemId().toString();
+					table.setImmediate(true);
+
+					Id = (Integer) table.getContainerProperty(
+							event.getItemId(), "ID").getValue();
+					listUpdate();
+				}
+			}
+		});
+
+		list();
+		tabsheet.addListener(new TabSheet.SelectedTabChangeListener() {
+
+			private static final long serialVersionUID = 1L;
+
+			public void selectedTabChange(SelectedTabChangeEvent event) {
+				table.removeAllItems();
+				list();
+
+			}
+		});
+
 		myTabRoot2.addComponent(table);
 		tabsheet.addTab(myTabRoot2);
 		tabsheet.getTab(myTabRoot2).setCaption("Second Tab");
 
+		// tab3 starter
 		Button generateReport = new Button("Generate");
 
 		combo.addItem("Male Costumer");
@@ -640,13 +581,16 @@ public class FormBidingComposite extends CustomComponent {
 		combo.setNullSelectionAllowed(false);
 		generateReport.addListener(new ClickListener() {
 
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void buttonClick(ClickEvent event) {
 
 				try {
 					listTab3();
+					getApplication().getMainWindow().showNotification(
+							"PDF is Generated");
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 

@@ -1,10 +1,6 @@
 package com.example.vaadinformdatabinding;
 
-import javafx.scene.control.ComboBox;
-
 import com.vaadin.data.Item;
-import com.vaadin.data.Validator;
-import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
@@ -14,6 +10,8 @@ import com.vaadin.ui.Select;
 import com.vaadin.ui.TextField;
 
 public class KullaniciFormFieldFactory implements FormFieldFactory {
+
+	private static final long serialVersionUID = 1L;
 
 	public Field createField(Item item, Object propertyId, Component uiContext) {
 		String propertyName = (String) propertyId;
