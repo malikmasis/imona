@@ -1,13 +1,30 @@
 package com.example.vaadinformdatabinding;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Vector;
+
+import org.apache.tools.ant.util.OutputStreamFunneler;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRExporter;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
+import net.sf.jasperreports.view.JasperViewer;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.Font;
@@ -19,10 +36,12 @@ import com.mysql.jdbc.PreparedStatement;
 import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.event.ItemClickEvent;
+import com.vaadin.terminal.FileResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.Form;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.PopupView;
@@ -53,126 +72,6 @@ public class FormBidingComposite extends CustomComponent {
 	KullaniciFormBean kullaniciFormBeanUpdate = new KullaniciFormBean();
 	BeanItem<KullaniciFormBean> beanItemUpdate = new BeanItem<KullaniciFormBean>(
 			kullaniciFormBeanUpdate);
-	Table table1;
-
-	Table tableGenerate() {
-
-		table1 = new Table();
-		// table.setStyleName("iso3166");
-		table1.setPageLength(6);
-		table1.setSizeFull();
-		table1.setSelectable(true);
-		table1.setMultiSelect(false);
-		table1.setImmediate(true);
-		table1.setColumnReorderingAllowed(true);
-		table1.setColumnCollapsingAllowed(true);
-		table1.refreshRowCache();
-		table1.setImmediate(true);
-		table1.setEnabled(true);
-		table1.addContainerProperty("NAME", String.class, "");
-		table1.addContainerProperty("SURNAME", String.class, "");
-		table1.addContainerProperty("GENDER", String.class, "");
-		table1.addContainerProperty("BIRTH DATE", String.class, "");
-		table1.addContainerProperty("BIRTH CITY", String.class, "");
-		table1.addContainerProperty("STATUS", Boolean.class, "");
-		return table1;
-
-	}
-
-	public void listTab3() throws Exception {
-		try {
-			System.out.println("listTab3");
-			Class.forName("com.mysql.jdbc.Driver");
-
-			String url = "jdbc:mysql://localhost:3306/imona";
-			String kullaniciad = "root";
-			String sifre = "";
-
-			Connection con = null;
-			Statement st = null;
-			ResultSet rs = null;
-
-			con = DriverManager.getConnection(url, kullaniciad, sifre);
-			st = con.createStatement();
-			System.out.println("Baglandi");
-
-			int itemId = 1;
-			cs = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
-					ResultSet.CONCUR_UPDATABLE);
-			if (combo.getValue().toString().equals("Male Costumer")) {
-				System.out.println("MAle");
-				rs = cs.executeQuery("select name,surname,gender,birthDate,birthCity,flag from customer where gender= 'Male' ");
-				table1.removeAllItems();
-			} else {
-				System.out.println("ist");
-				table1.removeAllItems();
-				rs = cs.executeQuery("select * from customer where birthCity= 'istanbul' ");
-			}
-
-			String[][] bdy = new String[10][5];
-			while (rs.next()) {
-
-				table1.addItem(
-						new Object[] { rs.getString(1), rs.getString(2),
-								rs.getString(3), rs.getString(4),
-								rs.getString(5), rs.getBoolean(6) }, itemId++);
-				// System.out.println("List--" + rs.getString(1));
-				for (int k = 0; k < 5; k++) {
-					// System.out.println("geliyor mu"+itemId+"--"+k);
-					bdy[itemId - 2][k] = rs.getString(k + 1);
-					// System.out.println(rs.getString(k+1)+"---");
-					System.out.println(bdy[itemId - 2][k] + "***");
-				}
-
-				createSamplePDF(
-						new String[] { "name", rs.getString(2),
-								rs.getString(3), rs.getString(4),
-								rs.getString(5) }, bdy);
-			}
-			System.out.println("pdf ok");
-			con.close();
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
-			System.out.println("Sürücü projeye eklenmemiş!");
-
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-			System.out.println("Veritabanına bağlantı sağlanamadı!");
-		}
-	}
-
-	public static void createSamplePDF(String header[], String body[][])
-			throws Exception {
-		Document documento = new Document();
-		// Create new File
-		File file = new File("D:\\filter.pdf");
-		file.createNewFile();
-		FileOutputStream fop = new FileOutputStream(file);
-		PdfWriter.getInstance(documento, fop);
-		documento.open();
-		// Fonts
-		Font fontBody = new Font(Font.COURIER, 12, Font.NORMAL);
-		// Table for header
-		PdfPTable cabetabla = new PdfPTable(header.length);
-		for (int j = 0; j < header.length; j++) {
-			Phrase frase = new Phrase(header[j]);
-			PdfPCell cell = new PdfPCell(frase);
-			cabetabla.addCell(cell);
-		}
-		documento.add(cabetabla);
-
-		// Tabla for body
-		PdfPTable tabla = new PdfPTable(header.length);
-		for (int i = 0; i < body.length; i++) {
-			for (int j = 0; j < body[i].length; j++) {
-				tabla.addCell(new Phrase(body[i][j], fontBody));
-			}
-		}
-		documento.add(tabla);
-		documento.close();
-		fop.flush();
-		fop.close();
-	}
 
 	public void listUpdate() {
 		try {
@@ -289,7 +188,7 @@ public class FormBidingComposite extends CustomComponent {
 
 			String query = "update customer set  name= ? , surname=?, gender=?, birthCity=? , flag=? where Id='"
 					+ Id + "'";
-			
+
 			PreparedStatement preparedStatement = (PreparedStatement) con
 					.prepareStatement(query);
 			preparedStatement.setString(1, kullaniciFormBeanUpdate.getName());
@@ -299,8 +198,8 @@ public class FormBidingComposite extends CustomComponent {
 			preparedStatement.setString(4,
 					kullaniciFormBeanUpdate.getBirthCity());
 			preparedStatement.setBoolean(5, kullaniciFormBeanUpdate.isFlag());
-//			preparedStatement.setString(6, kullaniciFormBean.getBirthDate()
-//					.toString());
+			// preparedStatement.setString(6, kullaniciFormBean.getBirthDate()
+			// .toString());
 			preparedStatement.execute();
 			con.close();
 			getWindow().showNotification("Update Success!");
@@ -580,17 +479,72 @@ public class FormBidingComposite extends CustomComponent {
 		combo.addItem("Customer in Istanbul");
 		combo.setNullSelectionAllowed(false);
 		generateReport.addListener(new ClickListener() {
-
+			
+			int i=0;Embedded pdf = null;
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-
+				
+				
+				if(i>0){
+					myTabRoot3.removeComponent(pdf);
+				}
 				try {
-					listTab3();
-					getApplication().getMainWindow().showNotification(
-							"PDF is Generated");
-				} catch (Exception e) {
+					String url = "jdbc:mysql://localhost:3306/imona";
+					String kullaniciad = "root";
+					String sifre = "";
+
+					Connection con = null;
+					Statement st = null;
+					ResultSet rs = null;
+
+					con = DriverManager.getConnection(url, kullaniciad, sifre);
+					st = con.createStatement();
+					System.out.println("Baglandi");
+					con = DriverManager.getConnection(
+							"jdbc:mysql://localhost:3306/imona", "root", "");
+					JasperPrint jp = null;
+					String jasperName = "";
+					if (combo.getValue().toString().equals("Male Costumer")) {
+						jasperName = "selectMale";
+						jp = JasperFillManager
+								.fillReport(
+										"C:\\Users\\malikmasis\\workspace\\VaadinFormDataBinding\\selectMale.jasper",
+										null, con);
+
+					} else {
+						jasperName = "selectIstanbul";
+						jp = JasperFillManager
+								.fillReport(
+										"C:\\Users\\malikmasis\\workspace\\VaadinFormDataBinding\\selectIstanbul.jasper",
+										null, con);
+					}
+					// create PDF
+					JasperExportManager.exportReportToPdfFile(jp, "D:\\Report"
+							+ jasperName + ".pdf");
+					// view report in the JasperViewer
+					// JasperViewer.viewReport(jp, false);
+
+					// embeded pdf to browser
+					File pdfFile = new File("D:\\Report" + jasperName + ".pdf");
+
+					pdf = new Embedded("Title", new FileResource(pdfFile,
+							getApplication()));
+
+					pdf.setMimeType("application/pdf");
+					pdf.setType(Embedded.TYPE_BROWSER);
+					pdf.setHeight("1000px");
+					pdf.setWidth("1000px");
+
+					myTabRoot3.addComponent(pdf);i++;
+
+					con.close();
+				} catch (SQLException e1) {
+					System.out.println("-");
+					e1.printStackTrace();
+				} catch (JRException e) {
+					System.out.println("*");
 					e.printStackTrace();
 				}
 
@@ -599,7 +553,7 @@ public class FormBidingComposite extends CustomComponent {
 
 		myTabRoot3.addComponent(combo);
 		myTabRoot3.addComponent(generateReport);
-		myTabRoot3.addComponent(tableGenerate());
+		// myTabRoot3.addComponent(tableGenerate());
 		tabsheet.addTab(myTabRoot3);
 		tabsheet.getTab(myTabRoot3).setCaption("Third Tab");
 
