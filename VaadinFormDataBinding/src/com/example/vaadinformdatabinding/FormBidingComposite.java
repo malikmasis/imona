@@ -510,14 +510,14 @@ public class FormBidingComposite extends CustomComponent {
 						jasperName = "selectMale";
 						jp = JasperFillManager
 								.fillReport(
-										"C:\\Users\\malikmasis\\workspace\\VaadinFormDataBinding\\selectMale.jasper",
+										"C:\\Users\\malikmasis\\workspace\\imona\\imona\\VaadinFormDataBinding\\selectMale.jasper",
 										null, con);
 
 					} else {
 						jasperName = "selectIstanbul";
 						jp = JasperFillManager
 								.fillReport(
-										"C:\\Users\\malikmasis\\workspace\\VaadinFormDataBinding\\selectIstanbul.jasper",
+										"C:\\Users\\malikmasis\\workspace\\VaadinFormDataBinding2\\selectIstanbul.jasper",
 										null, con);
 					}
 					// create PDF
